@@ -1,15 +1,14 @@
 import { useEffect, useState } from 'react';
-import { getJson } from '../api/client.js';
 
 type Props = {
   title: string;
   description: string;
-  endpoint: string;
+  load: () => Promise<Record<string, unknown>>;
   collection: string;
   emptyMessage: string;
 };
 
-export function CapabilityCard({ title, description, endpoint, collection, emptyMessage }: Props) {
+export function CapabilityCard({ title, description, load, collection, emptyMessage }: Props) {
   const [items, setItems] = useState<Record<string, unknown>[] | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -18,7 +17,7 @@ export function CapabilityCard({ title, description, endpoint, collection, empty
     setItems(null);
     setError(null);
 
-    getJson<Record<string, unknown>>(endpoint)
+    load()
       .then((response) => {
         const result = response[collection];
         if (!Array.isArray(result)) throw new Error('The API returned an invalid response');
@@ -31,7 +30,7 @@ export function CapabilityCard({ title, description, endpoint, collection, empty
     return () => {
       active = false;
     };
-  }, [collection, endpoint]);
+  }, [collection, load]);
 
   return (
     <section className="card h-100">
